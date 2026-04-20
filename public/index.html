@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>BrainQuest — Challenge Your Mind</title>
+<meta name="description" content="BrainQuest is a modern quiz platform with thousands of questions across categories. Test your knowledge, compete on leaderboards, and track your progress."/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧠</text></svg>"/>
+<link rel="stylesheet" href="css/style.css"/>
+<link rel="stylesheet" href="css/app.css"/>
+<link rel="stylesheet" href="css/components.css"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ═══ LANDING PAGE ═══ -->
+<div id="landing-screen" class="screen active">
+<nav class="landing-nav" id="landing-nav">
+  <div class="nav-logo"><img src="img/logo.png" alt="BrainQuest"/><span>BrainQuest</span></div>
+  <div class="nav-links" id="nav-links-desktop">
+    <a href="#features">Features</a><a href="#categories-section">Categories</a><a href="#kids">Kids</a><a href="#testimonials">Reviews</a><a href="#leaderboard-section">Leaderboard</a>
+  </div>
+  <div class="nav-cta">
+    <button class="theme-toggle" id="theme-toggle-landing" onclick="toggleTheme()" title="Toggle theme"><i class="fas fa-moon"></i></button>
+    <button class="btn btn-s" onclick="showScreen('auth')">Login</button>
+    <button class="btn btn-p" onclick="showScreen('auth');switchAuth('register')">Sign Up Free</button>
+    <button class="hamburger" id="hamburger" onclick="toggleMobileNav()"><i class="fas fa-bars"></i></button>
+  </div>
+</nav>
+<div class="mobile-nav" id="mobile-nav">
+  <a href="#features" onclick="closeMobileNav()">Features</a><a href="#categories-section" onclick="closeMobileNav()">Categories</a><a href="#kids" onclick="closeMobileNav()">Kids</a><a href="#testimonials" onclick="closeMobileNav()">Reviews</a>
+  <a href="#" onclick="closeMobileNav();showScreen('auth')">Login</a>
+</div>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-shapes"><div class="sh h1"></div><div class="sh h2"></div><div class="sh h3"></div></div>
+  <div class="hero-content">
+    <div class="hero-badge">🚀 The smartest way to learn</div>
+    <h1>Challenge Your Mind with <span class="highlight">BrainQuest</span></h1>
+    <p class="hero-sub">Thousands of quizzes across 12+ categories. Track your streaks, climb leaderboards, and unlock achievements. Learning has never been this fun.</p>
+    <div class="hero-btns">
+      <button class="btn btn-p" onclick="showScreen('auth');switchAuth('register')"><i class="fas fa-rocket"></i> Get Started Free</button>
+      <button class="btn btn-s" onclick="document.getElementById('features').scrollIntoView({behavior:'smooth'})"><i class="fas fa-play"></i> Explore</button>
+    </div>
+    <div class="hero-stats">
+      <div><div class="hero-stat-val">12+</div><div class="hero-stat-lbl">Categories</div></div>
+      <div><div class="hero-stat-val">500+</div><div class="hero-stat-lbl">Questions</div></div>
+      <div><div class="hero-stat-val">20+</div><div class="hero-stat-lbl">Quizzes</div></div>
+      <div><div class="hero-stat-val">🔥</div><div class="hero-stat-lbl">Daily Streaks</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- Search -->
+<div class="search-section">
+  <div class="search-wrap">
+    <i class="fas fa-search"></i>
+    <input type="text" id="landing-search" placeholder="Search categories, quizzes, topics..." oninput="handleLandingSearch(this.value)"/>
+    <div class="search-results" id="landing-search-results"></div>
+  </div>
+</div>
+
+<!-- Features -->
+<section class="section" id="features">
+  <div class="section-head"><div class="section-label">✨ Why BrainQuest</div><h2>Everything You Need to Learn & Compete</h2><p>Modern features designed for the ultimate quiz experience</p></div>
+  <div class="features-grid">
+    <div class="feature-card"><div class="feature-icon">🧠</div><h3>Smart Quiz Engine</h3><p>MCQ, True/False, Fill-in-blank — multiple quiz types with instant feedback and explanations.</p></div>
+    <div class="feature-card"><div class="feature-icon">🔥</div><h3>Daily Streaks</h3><p>Build your streak by taking a quiz every day. Stay motivated and never break the chain!</p></div>
+    <div class="feature-card"><div class="feature-icon">🏆</div><h3>Leaderboards</h3><p>Compete globally, by category, or weekly. See where you stand among other learners.</p></div>
+    <div class="feature-card"><div class="feature-icon">👶</div><h3>Kids Zone</h3><p>Fun, colorful quizzes designed for young minds. Animals, space, riddles and more!</p></div>
+    <div class="feature-card"><div class="feature-icon">📊</div><h3>Analytics</h3><p>Track your performance with detailed charts, category breakdowns, and progress reports.</p></div>
+    <div class="feature-card"><div class="feature-icon">🌙</div><h3>Dark & Light Mode</h3><p>Study in comfort with your preferred theme. Eye-friendly designs for day and night.</p></div>
+  </div>
+</section>
+
+<!-- Categories Preview -->
+<section class="section" id="categories-section">
+  <div class="section-head"><div class="section-label">📚 Categories</div><h2>Explore Our Quiz Categories</h2><p>From science to sports, history to programming — we've got it all</p></div>
+  <div class="cat-grid-landing" id="landing-categories"></div>
+</section>
+
+<!-- Streak Banner -->
+<div class="section" style="padding-top:0">
+  <div class="streak-banner">
+    <div class="streak-fire">🔥</div>
+    <h3>Daily Quiz Challenge</h3>
+    <p>Take a quiz every day to build your streak. Earn special achievements and climb the leaderboard!</p>
+    <button class="btn btn-p" style="margin-top:1rem" onclick="showScreen('auth')"><i class="fas fa-bolt"></i> Start Today's Quiz</button>
+  </div>
+</div>
+
+<!-- Kids Section -->
+<section class="section" id="kids">
+  <div class="kids-section">
+    <div class="section-label">🌈 For Young Minds</div>
+    <h2 style="font-size:1.5rem;margin-bottom:.5rem">Kids Zone</h2>
+    <p style="color:var(--t2);font-size:.9rem;margin-bottom:0">Fun and educational quizzes designed especially for children!</p>
+    <div class="kids-grid" id="landing-kids"></div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="section" id="testimonials">
+  <div class="section-head"><div class="section-label">💬 Testimonials</div><h2>What Our Users Say</h2><p>Join thousands of happy learners worldwide</p></div>
+  <div class="testimonials-wrap">
+    <div class="testimonial"><p class="test-text">BrainQuest made studying actually fun! The streak feature keeps me coming back every day.</p><div class="test-author"><div class="test-avatar">R</div><div><div class="test-name">Rahul S.</div><div class="test-role">Student</div></div></div></div>
+    <div class="testimonial"><p class="test-text">I use the Kids Zone with my children. They love the colorful quizzes and fun animations!</p><div class="test-author"><div class="test-avatar">P</div><div><div class="test-name">Priya M.</div><div class="test-role">Parent</div></div></div></div>
+    <div class="testimonial"><p class="test-text">The admin panel makes it so easy to create and manage quizzes for my students. Highly recommended!</p><div class="test-author"><div class="test-avatar">A</div><div><div class="test-name">Amit K.</div><div class="test-role">Teacher</div></div></div></div>
+    <div class="testimonial"><p class="test-text">Love the leaderboard feature! Competing with friends motivates us to study more. The dark mode is gorgeous.</p><div class="test-author"><div class="test-avatar">S</div><div><div class="test-name">Sara L.</div><div class="test-role">College Student</div></div></div></div>
+  </div>
+</section>
+
+<!-- Leaderboard Preview -->
+<section class="section" id="leaderboard-section">
+  <div class="section-head"><div class="section-label">🏅 Top Performers</div><h2>Leaderboard</h2><p>See who's leading the pack</p></div>
+  <div class="lb-preview" id="landing-leaderboard"></div>
+  <div style="text-align:center;margin-top:1.5rem"><button class="btn btn-s" onclick="showScreen('auth')">Join & Compete <i class="fas fa-arrow-right"></i></button></div>
+</section>
+
+<!-- Footer -->
+<footer class="landing-footer">
+  <div class="footer-grid">
+    <div><div class="footer-brand">🧠 BrainQuest</div><p class="footer-desc">The modern quiz platform for curious minds. Learn, compete, and grow with thousands of quizzes across every category imaginable.</p></div>
+    <div><div class="footer-title">Platform</div><ul class="footer-links"><li><a href="#features">Features</a></li><li><a href="#categories-section">Categories</a></li><li><a href="#kids">Kids Zone</a></li><li><a href="#leaderboard-section">Leaderboard</a></li></ul></div>
+    <div><div class="footer-title">Quiz Types</div><ul class="footer-links"><li><a href="#">Full Length</a></li><li><a href="#">Quick Quiz</a></li><li><a href="#">Section Wise</a></li><li><a href="#">Timed Challenge</a></li></ul></div>
+    <div><div class="footer-title">Connect</div><ul class="footer-links"><li><a href="#">About Us</a></li><li><a href="#">Contact</a></li><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Service</a></li></ul></div>
+  </div>
+  <div class="footer-bottom">© 2026 BrainQuest. Built with 🧠 for curious minds everywhere.</div>
+</footer>
+</div>
+
+<!-- ═══ AUTH SCREEN ═══ -->
+<div id="auth-screen" class="screen">
+<div class="auth-bg">
+  <div class="auth-shapes"><div class="sh h1"></div><div class="sh h2"></div><div class="sh h3"></div></div>
+  <div class="auth-cont">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+      <div class="auth-brand"><img src="img/logo.png" alt="BQ"/><span>BrainQuest</span></div>
+      <button class="btn btn-s" onclick="showScreen('landing')" style="padding:6px 12px;font-size:.78rem"><i class="fas fa-arrow-left"></i> Home</button>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchAuth('login')">Login</button>
+      <button class="auth-tab" id="tab-register" onclick="switchAuth('register')">Register</button>
+    </div>
+    <form id="login-form" class="auth-form active" onsubmit="handleLogin(event)">
+      <h2>Welcome back</h2>
+      <p class="auth-sub">Sign in to continue your learning journey</p>
+      <div class="fg"><label>Email address</label><div class="iw"><i class="fas fa-envelope"></i><input type="email" id="login-email" placeholder="you@example.com" required/></div></div>
+      <div class="fg"><label>Password</label><div class="iw"><i class="fas fa-lock"></i><input type="password" id="login-pass" placeholder="••••••••" required/><button type="button" class="toggle-pw" onclick="togglePw('login-pass',this)"><i class="fas fa-eye"></i></button></div></div>
+      <div id="login-error" class="form-err"></div>
+      <button type="submit" class="btn btn-p btn-full">Sign In <i class="fas fa-arrow-right"></i></button>
+    </form>
+    <form id="register-form" class="auth-form" onsubmit="handleRegister(event)">
+      <h2>Create account</h2>
+      <p class="auth-sub">Join thousands of learners today</p>
+      <div class="fg"><label>Full name</label><div class="iw"><i class="fas fa-user"></i><input type="text" id="reg-name" placeholder="Your name" required/></div></div>
+      <div class="fg"><label>Email address</label><div class="iw"><i class="fas fa-envelope"></i><input type="email" id="reg-email" placeholder="you@example.com" required/></div></div>
+      <div class="fg"><label>Password</label><div class="iw"><i class="fas fa-lock"></i><input type="password" id="reg-pass" placeholder="Min 6 characters" required/><button type="button" class="toggle-pw" onclick="togglePw('reg-pass',this)"><i class="fas fa-eye"></i></button></div></div>
+      <div id="reg-error" class="form-err"></div>
+      <button type="submit" class="btn btn-p btn-full">Send Verification Code <i class="fas fa-paper-plane"></i></button>
+    </form>
+    <form id="otp-form" class="auth-form" onsubmit="handleOTPVerify(event)" style="display:none">
+      <h2>Verify Email</h2>
+      <p class="auth-sub">Enter the 6-digit code sent to your email</p>
+      <div class="otp-display" id="otp-display"></div>
+      <div class="fg"><label>Verification Code</label><div class="iw"><i class="fas fa-shield-alt"></i><input type="text" id="otp-input" placeholder="Enter 6-digit code" maxlength="6" required autocomplete="off" style="letter-spacing:8px;font-size:1.2rem;font-weight:700;text-align:center"/></div></div>
+      <div id="otp-error" class="form-err"></div>
+      <button type="submit" class="btn btn-p btn-full">Verify & Create Account <i class="fas fa-check"></i></button>
+      <div style="display:flex;justify-content:space-between;margin-top:.75rem"><button type="button" class="btn btn-s" onclick="cancelOTP()" style="font-size:.78rem"><i class="fas fa-arrow-left"></i> Back</button><button type="button" class="btn btn-s" id="resend-btn" onclick="resendOTP()" style="font-size:.78rem">Resend Code <i class="fas fa-redo"></i></button></div>
+      <div id="otp-timer" class="otp-timer"></div>
+    </form>
+  </div>
+</div>
+</div>
+
+<!-- ═══ MAIN APP ═══ -->
+<div id="app-screen" class="screen">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-brand"><img src="img/logo.png" alt="BQ"/><span>BrainQuest</span></div>
+  <nav class="sidebar-nav">
+    <a class="nav-item active" data-page="dashboard"><i class="fas fa-home"></i><span>Dashboard</span></a>
+    <a class="nav-item" data-page="categories"><i class="fas fa-th-large"></i><span>Categories</span></a>
+    <a class="nav-item" data-page="kids-zone"><i class="fas fa-child"></i><span>Kids Zone</span></a>
+    <a class="nav-item" data-page="leaderboard"><i class="fas fa-trophy"></i><span>Leaderboard</span></a>
+    <a class="nav-item" data-page="history"><i class="fas fa-history"></i><span>My History</span></a>
+    <a class="nav-item" data-page="profile"><i class="fas fa-user-circle"></i><span>Profile</span></a>
+    <div class="nav-divider"></div>
+    <a class="nav-item admin-only hidden" data-page="admin"><i class="fas fa-shield-alt"></i><span>Admin Panel</span></a>
+  </nav>
+  <div class="sidebar-footer">
+    <button class="theme-toggle" onclick="toggleTheme()" style="width:100%;border-radius:var(--r10);margin-bottom:8px;height:36px;font-size:.8rem;gap:6px;display:flex;align-items:center;justify-content:center"><i class="fas fa-moon" id="theme-icon-sidebar"></i><span id="theme-label">Dark Mode</span></button>
+    <div class="user-chip" id="sidebar-user"></div>
+    <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </div>
+</aside>
+
+<div class="topbar">
+  <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+  <div class="topbar-title" id="topbar-title">Dashboard</div>
+  <div class="topbar-right">
+    <div class="topbar-search"><i class="fas fa-search"></i><input type="text" id="app-search" placeholder="Search..." oninput="handleAppSearch(this.value)"/></div>
+    <button class="theme-toggle" onclick="toggleTheme()" id="theme-toggle-app"><i class="fas fa-moon"></i></button>
+    <div class="topbar-user" id="topbar-user"></div>
+  </div>
+</div>
+
+<main class="main-content" id="main-content">
+
+<!-- DASHBOARD -->
+<div id="page-dashboard" class="page active">
+  <div class="page-head"><div><h1 id="dash-greeting">Good morning!</h1><p class="page-sub">Ready for today's challenge?</p></div></div>
+  <div id="dash-streak"></div>
+  <div class="stats-grid" id="dash-stats"></div>
+  <div class="sec-title">🎯 Daily Quiz</div>
+  <div id="dash-daily"></div>
+  <div class="sec-title" style="margin-top:1.5rem">Continue Learning</div>
+  <div class="cat-grid" id="dash-categories"></div>
+  <div class="sec-title" style="margin-top:1.5rem">Recent Activity</div>
+  <div id="dash-recent"></div>
+</div>
+
+<!-- CATEGORIES -->
+<div id="page-categories" class="page">
+  <div class="page-head"><div><h1>Quiz Categories</h1><p class="page-sub">Choose a topic and test your knowledge</p></div></div>
+  <div class="cat-grid lg" id="cat-grid"></div>
+</div>
+
+<!-- KIDS ZONE -->
+<div id="page-kids-zone" class="page">
+  <div class="page-head"><div><h1>🌈 Kids Zone</h1><p class="page-sub">Fun quizzes for young learners!</p></div></div>
+  <div class="kids-grid" id="kids-cat-grid" style="max-width:800px"></div>
+  <div id="kids-quiz-area" style="margin-top:1.5rem"></div>
+</div>
+
+<!-- QUIZ BROWSER -->
+<div id="page-quizzes" class="page">
+  <div class="page-head">
+    <button class="btn btn-s" onclick="showPage('categories')" style="padding:7px 14px;font-size:.82rem"><i class="fas fa-arrow-left"></i> Back</button>
+    <div><h1 id="quiz-browser-title">Quizzes</h1><p class="page-sub" id="quiz-browser-sub"></p></div>
+  </div>
+  <div class="quiz-grid" id="quiz-list-grid"></div>
+</div>
+
+<!-- QUIZ PLAYER -->
+<div id="page-quiz" class="page">
+  <div class="qp-head">
+    <div><div class="qp-name" id="qp-name"></div><div class="qp-prog" id="qp-progress"></div></div>
+    <div class="timer-wrap"><svg class="timer-ring" viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" class="ring-bg"/><circle cx="24" cy="24" r="20" class="ring-fg" id="ring-fg"/></svg><div class="timer-text" id="timer-text">—</div></div>
+  </div>
+  <div class="prog-track"><div class="prog-bar" id="qp-bar"></div></div>
+  <div class="quiz-body">
+    <div class="q-meta" id="q-meta"></div>
+    <div class="q-text" id="q-text"></div>
+    <div class="q-img-wrap" id="q-img-wrap" style="display:none"><img id="q-image" alt="Question"/></div>
+    <div class="q-opts" id="q-options"></div>
+    <div id="q-fill-wrap" style="display:none"><input type="text" id="q-fill-input" class="fill-input" placeholder="Type your answer..."/><button class="btn btn-p" onclick="submitFill()" style="margin-top:8px">Submit Answer</button></div>
+    <div class="q-fb" id="q-feedback" style="display:none"></div>
+  </div>
+  <div class="quiz-foot">
+    <button class="btn btn-s" style="color:#f87171;border-color:rgba(239,68,68,.3)" onclick="confirmQuit()"><i class="fas fa-times"></i> Quit</button>
+    <button class="btn btn-p" id="next-btn" onclick="nextQuestion()" style="display:none">Next <i class="fas fa-arrow-right"></i></button>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div id="page-results" class="page">
+  <div class="res-hero" id="results-hero">
+    <div class="score-ring-wrap"><svg viewBox="0 0 120 120"><circle cx="60" cy="60" r="52" class="score-ring-bg"/><circle cx="60" cy="60" r="52" class="score-ring-fill" id="score-ring-fill"/></svg><div class="score-center"><div class="score-pct" id="res-pct">0%</div><div class="score-grade" id="res-grade"></div></div></div>
+    <div><div class="res-title" id="res-title"></div><div class="res-sub" id="res-sub"></div><div class="res-stats" id="res-stats"></div></div>
+  </div>
+  <div class="sec-title">Answer Review</div>
+  <div id="answer-review-list"></div>
+  <div class="res-actions"><button class="btn btn-s" onclick="showPage('categories')"><i class="fas fa-th-large"></i> Browse</button><button class="btn btn-p" onclick="retryQuiz()"><i class="fas fa-redo"></i> Retry</button></div>
+</div>
+
+<!-- LEADERBOARD -->
+<div id="page-leaderboard" class="page">
+  <div class="page-head"><h1>Leaderboard</h1><p class="page-sub">Top performers across all quizzes</p></div>
+  <div class="lb-filters"><select id="lb-cat-filter" onchange="updateLbQuizFilter();renderLbTable()"><option value="all">All Categories</option></select><select id="lb-quiz-filter" onchange="renderLbTable()"><option value="all">All Quizzes</option></select></div>
+  <div id="lb-podium" class="lb-podium"></div>
+  <div id="lb-table" class="lb-table"></div>
+</div>
+
+<!-- HISTORY -->
+<div id="page-history" class="page">
+  <div class="page-head"><h1>Quiz History</h1><p class="page-sub">All your past attempts</p></div>
+  <div id="history-list"></div>
+</div>
+
+<!-- PROFILE -->
+<div id="page-profile" class="page">
+  <div class="prof-hero" id="profile-hero"></div>
+  <div class="prof-grid">
+    <div>
+      <div class="sec-title">Performance</div>
+      <div class="card"><canvas id="perf-chart" height="220"></canvas></div>
+      <div class="sec-title" style="margin-top:1.5rem">Category Breakdown</div>
+      <div class="card"><canvas id="cat-chart" height="220"></canvas></div>
+    </div>
+    <div>
+      <div class="sec-title">Edit Profile</div>
+      <div class="card">
+        <div class="fg"><label>Full name</label><div class="iw"><i class="fas fa-user"></i><input type="text" id="edit-name"/></div></div>
+        <div class="fg"><label>New password</label><div class="iw"><i class="fas fa-lock"></i><input type="password" id="edit-pass" placeholder="Leave blank to keep"/></div></div>
+        <button class="btn btn-p btn-full" onclick="saveProfile()" style="margin-top:.75rem">Save Changes</button>
+        <div id="profile-msg" class="form-ok"></div>
+      </div>
+      <div class="sec-title" style="margin-top:1.5rem">Achievements</div>
+      <div class="achiev-grid" id="achievements-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="page-admin" class="page">
+  <div class="page-head" style="justify-content:space-between;flex-wrap:wrap;gap:1rem"><div><h1>Admin Panel <span id="admin-role-badge" style="font-size:.72rem;font-weight:700;padding:4px 10px;border-radius:99px;vertical-align:middle;margin-left:6px"></span></h1><p class="page-sub">Manage quizzes, questions, categories and users</p></div></div>
+  <div class="admin-tabs">
+    <button class="admin-tab active" onclick="adminTab('questions',this)">Questions</button>
+    <button class="admin-tab" onclick="adminTab('quizzes',this)">Quizzes</button>
+    <button class="admin-tab" onclick="adminTab('categories-mgmt',this)">Categories</button>
+    <button class="admin-tab" onclick="adminTab('users',this)">Users</button>
+    <button class="admin-tab" onclick="adminTab('user-analytics',this)">User Analytics</button>
+    <button class="admin-tab" onclick="adminTab('stats',this)">Statistics</button>
+  </div>
+  <div id="admin-questions" class="admin-panel active">
+    <div class="admin-toolbar"><button class="btn btn-p" onclick="openQuestionModal()"><i class="fas fa-plus"></i> Add Question</button><select id="aq-cat-filter" onchange="renderAdminQuestions()"><option value="all">All Categories</option></select><select id="aq-type-filter" onchange="renderAdminQuestions()"><option value="all">All Types</option><option value="mcq">MCQ</option><option value="truefalse">True/False</option><option value="fill">Fill in Blank</option></select></div>
+    <div id="admin-q-list"></div>
+  </div>
+  <div id="admin-quizzes" class="admin-panel">
+    <div class="admin-toolbar"><button class="btn btn-p" onclick="openQuizModal()"><i class="fas fa-plus"></i> Create Quiz</button></div>
+    <div id="admin-quiz-list"></div>
+  </div>
+  <div id="admin-categories-mgmt" class="admin-panel">
+    <div class="admin-toolbar"><button class="btn btn-p" onclick="openCategoryModal()"><i class="fas fa-plus"></i> Add Category</button></div>
+    <div id="admin-cat-list"></div>
+  </div>
+  <div id="admin-users" class="admin-panel"><div id="admin-user-list"></div></div>
+  <div id="admin-user-analytics" class="admin-panel">
+    <div class="admin-toolbar"><select id="ua-user-filter" onchange="renderUserAnalytics()"><option value="all">All Users</option></select></div>
+    <div class="stats-grid" id="ua-stats-grid"></div>
+    <div class="adm-charts"><div class="card"><div class="sec-title">User Performance Over Time</div><canvas id="ua-perf-chart" height="250"></canvas></div><div class="card"><div class="sec-title">Category Distribution</div><canvas id="ua-cat-chart" height="250"></canvas></div></div>
+    <div class="sec-title" style="margin-top:1.5rem">Recent Attempts</div>
+    <div id="ua-attempts-list"></div>
+  </div>
+  <div id="admin-stats" class="admin-panel">
+    <div class="stats-grid" id="admin-stats-grid"></div>
+    <div class="adm-charts"><div class="card"><div class="sec-title">Attempts per Quiz</div><canvas id="admin-attempts-chart" height="250"></canvas></div><div class="card"><div class="sec-title">Scores Distribution</div><canvas id="admin-scores-chart" height="250"></canvas></div></div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- MODALS -->
+<div id="modal-overlay" class="modal-overlay" onclick="closeModal(event)">
+  <div class="modal" id="modal-box"><div class="modal-head"><div class="modal-title" id="modal-title"></div><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div><div class="modal-body" id="modal-body"></div></div>
+</div>
+<div id="confirm-overlay" class="modal-overlay" onclick="closeConfirm()">
+  <div class="modal sm"><div class="modal-body" id="confirm-body"></div><div class="modal-foot"><button class="btn btn-s" onclick="closeConfirm()">Cancel</button><button class="btn btn-r" id="confirm-ok">Confirm</button></div></div>
+</div>
+
+<div id="toast-container"></div>
+<canvas id="confetti-canvas"></canvas>
+<canvas id="particles-canvas"></canvas>
+
+<!-- PAGE LOADER -->
+<div id="page-loader" class="page-loader">
+  <div class="loader-content">
+    <div class="loader-spinner"></div>
+    <div class="loader-text">Loading...</div>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+<script src="js/quiz.js"></script>
+<script src="js/admin.js"></script>
+</body>
+</html>
