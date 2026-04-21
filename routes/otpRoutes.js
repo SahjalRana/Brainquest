@@ -82,7 +82,7 @@ router.post('/send', async (req, res) => {
     }
   } catch (err) {
     console.error('Email send error:', err);
-    res.status(500).json({ error: 'Failed to send verification email. Please try again.' });
+    res.status(500).json({ error: 'Email address appears to be fake or invalid. Could not deliver code.' });
   }
 });
 
