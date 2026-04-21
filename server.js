@@ -23,6 +23,19 @@ app.use('/api/leaderboard', require('./routes/leaderboardRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/otp', require('./routes/otpRoutes'));
 
+// Global Memory Sync for Demo Purposes
+let globalMemoryDB = null;
+
+app.get('/api/sync', (req, res) => {
+  res.json(globalMemoryDB || {});
+});
+
+app.post('/api/sync', (req, res) => {
+  globalMemoryDB = req.body;
+  res.json({ success: true });
+});
+
+
 // Health check
 app.get('/api/health', (req, res) => res.json({ status: 'ok', name: 'BrainQuest API' }));
 

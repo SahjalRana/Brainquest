@@ -131,22 +131,43 @@ let DB={users:[],questions:[],quizzes:[],scores:[],streaks:{}};
 let currentUser=null,quizSession=null;
 let perfChart=null,catChart=null,adminAttemptsChart=null,adminScoresChart=null;
 
-function saveDB(){localStorage.setItem('bq_db',JSON.stringify(DB))}
-function loadDB(){
-const raw=localStorage.getItem('bq_db');
-if(raw){DB=JSON.parse(raw)}else{
-DB.questions=JSON.parse(JSON.stringify(SQ));
-DB.quizzes=JSON.parse(JSON.stringify(SEED_QUIZZES));
-DB.users=[
-{id:'u_admin',name:'Admin',email:'admin@brainquest.com',password:'admin123',role:'admin',joined:Date.now(),achievements:[]},
-{id:'u_demo',name:'Demo User',email:'user@brainquest.com',password:'user123',role:'user',joined:Date.now(),achievements:[]}
-];
-DB.scores=[];DB.streaks={};saveDB()}
-if(!DB.streaks)DB.streaks={};
-if(!DB.users.find(u=>u.email==='admin@brainquest.com')){DB.users.unshift({id:'u_admin',name:'Admin',email:'admin@brainquest.com',password:'admin123',role:'admin',joined:Date.now(),achievements:[]});saveDB()}
-const savedCats=localStorage.getItem('bq_categories');if(savedCats){const parsed=JSON.parse(savedCats);CATEGORIES.length=0;parsed.forEach(c=>CATEGORIES.push(c))}
-const saved=localStorage.getItem('bq_session');
-if(saved){currentUser=JSON.parse(saved);currentUser=DB.users.find(u=>u.id===currentUser.id)||null;if(currentUser)showApp()}
+function saveDB(){
+  localStorage.setItem('bq_db',JSON.stringify(DB));
+  fetch('/api/sync',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(DB)}).catch(e=>console.log('Sync error'));
+}
+
+async function loadDB(){
+  try {
+    const res = await fetch('/api/sync');
+    const data = await res.json();
+    if(data && data.users && data.users.length > 0) {
+      DB = data;
+      localStorage.setItem('bq_db', JSON.stringify(DB));
+    } else {
+      loadLocalDB();
+      saveDB(); // Seed the server with local DB if it's empty
+    }
+  } catch(e) {
+    loadLocalDB();
+  }
+
+  if(!DB.streaks)DB.streaks={};
+  if(!DB.users.find(u=>u.email==='admin@brainquest.com')){DB.users.unshift({id:'u_admin',name:'Admin',email:'admin@brainquest.com',password:'admin123',role:'admin',joined:Date.now(),achievements:[]});saveDB()}
+  const savedCats=localStorage.getItem('bq_categories');if(savedCats){const parsed=JSON.parse(savedCats);CATEGORIES.length=0;parsed.forEach(c=>CATEGORIES.push(c))}
+  const saved=localStorage.getItem('bq_session');
+  if(saved){currentUser=JSON.parse(saved);currentUser=DB.users.find(u=>u.id===currentUser.id)||null;if(currentUser)showApp()}
+}
+
+function loadLocalDB(){
+  const raw=localStorage.getItem('bq_db');
+  if(raw){DB=JSON.parse(raw)}else{
+  DB.questions=JSON.parse(JSON.stringify(SQ));
+  DB.quizzes=JSON.parse(JSON.stringify(SEED_QUIZZES));
+  DB.users=[
+  {id:'u_admin',name:'Admin',email:'admin@brainquest.com',password:'admin123',role:'admin',joined:Date.now(),achievements:[]},
+  {id:'u_demo',name:'Demo User',email:'user@brainquest.com',password:'user123',role:'user',joined:Date.now(),achievements:[]}
+  ];
+  DB.scores=[];DB.streaks={};saveDB()}
 }
 
 // THEME
