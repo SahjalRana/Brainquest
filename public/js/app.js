@@ -158,6 +158,27 @@ async function loadDB(){
   if(saved){currentUser=JSON.parse(saved);currentUser=DB.users.find(u=>u.id===currentUser.id)||null;if(currentUser)showApp()}
 }
 
+async function pollSync(){
+  try {
+    const res = await fetch('/api/sync');
+    const data = await res.json();
+    if(data && data.users && data.users.length > 0) {
+      const oldScores = JSON.stringify(DB.scores||[]);
+      const newScores = JSON.stringify(data.scores||[]);
+      if(oldScores !== newScores) {
+        DB = data;
+        localStorage.setItem('bq_db', JSON.stringify(DB));
+        if(typeof initLanding === 'function') initLanding();
+        const lp = document.getElementById('leaderboard-page');
+        if(lp && lp.classList.contains('active') && typeof renderLbTable === 'function') {
+          renderLbTable();
+        }
+      }
+    }
+  } catch(e) {}
+}
+setInterval(pollSync, 5000); // Check for updates every 5 seconds
+
 function loadLocalDB(){
   const raw=localStorage.getItem('bq_db');
   if(raw){DB=JSON.parse(raw)}else{
