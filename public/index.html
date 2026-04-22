@@ -23,14 +23,15 @@
   </div>
   <div class="nav-cta">
     <button class="theme-toggle" id="theme-toggle-landing" onclick="toggleTheme()" title="Toggle theme"><i class="fas fa-moon"></i></button>
-    <button class="btn btn-s" onclick="showScreen('auth')">Login</button>
-    <button class="btn btn-p" onclick="showScreen('auth');switchAuth('register')">Sign Up Free</button>
+    <button class="btn btn-s auth-btn-desktop" onclick="showScreen('auth')">Login</button>
+    <button class="btn btn-p auth-btn-desktop" onclick="showScreen('auth');switchAuth('register')">Sign Up Free</button>
     <button class="hamburger" id="hamburger" onclick="toggleMobileNav()"><i class="fas fa-bars"></i></button>
   </div>
 </nav>
 <div class="mobile-nav" id="mobile-nav">
   <a href="#features" onclick="closeMobileNav()">Features</a><a href="#categories-section" onclick="closeMobileNav()">Categories</a><a href="#kids" onclick="closeMobileNav()">Kids</a><a href="#testimonials" onclick="closeMobileNav()">Reviews</a>
   <a href="#" onclick="closeMobileNav();showScreen('auth')">Login</a>
+  <a href="#" onclick="closeMobileNav();showScreen('auth');switchAuth('register')" style="color:var(--p);font-weight:700">Sign Up Free</a>
 </div>
 
 <!-- Hero -->
