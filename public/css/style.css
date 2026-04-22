@@ -145,6 +145,7 @@ img{max-width:100%}
 .iw{position:relative;display:flex;align-items:center}
 .iw i{position:absolute;left:14px;color:var(--p);font-size:.82rem;z-index:1}
 .iw input,.iw select{width:100%;padding:11px 14px 11px 40px;background:var(--sf2);border:1px solid var(--bd2);border-radius:var(--r10);color:var(--t);font-size:.88rem;transition:all .25s}
+.iw input.pw-input{padding-right:40px}
 .iw input:focus,.iw select:focus{border-color:rgba(139,92,246,.5);box-shadow:0 0 0 4px rgba(139,92,246,.1)}
 .iw input::placeholder{color:var(--t3)}
 .toggle-pw{position:absolute;right:12px;background:transparent;color:var(--t3);font-size:.82rem;padding:4px;cursor:pointer}

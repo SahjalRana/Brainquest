@@ -201,7 +201,15 @@ function showScreen(n){document.querySelectorAll('.screen').forEach(s=>s.classLi
 
 // AUTH
 let pendingOTP=null,otpTimerInterval=null;
-function switchAuth(m){document.getElementById('tab-login').classList.toggle('active',m==='login');document.getElementById('tab-register').classList.toggle('active',m==='register');document.getElementById('login-form').classList.toggle('active',m==='login');document.getElementById('register-form').classList.toggle('active',m==='register');document.getElementById('otp-form').style.display='none'}
+function switchAuth(m){
+  document.getElementById('tab-login').classList.toggle('active',m==='login');
+  document.getElementById('tab-register').classList.toggle('active',m==='register');
+  document.getElementById('login-form').classList.toggle('active',m==='login');
+  document.getElementById('register-form').classList.toggle('active',m==='register');
+  document.getElementById('otp-form').style.display='none';
+  const ff=document.getElementById('forgot-form'); if(ff)ff.style.display='none';
+  const fof=document.getElementById('forgot-otp-form'); if(fof)fof.style.display='none';
+}
 function handleLogin(e){e.preventDefault();const em=document.getElementById('login-email').value.trim().toLowerCase();const pw=document.getElementById('login-pass').value;const u=DB.users.find(u=>u.email===em&&u.password===pw);if(!u){document.getElementById('login-error').textContent='Invalid email or password.';return}document.getElementById('login-error').textContent='';currentUser=u;localStorage.setItem('bq_session',JSON.stringify({id:u.id}));showApp()}
 function handleRegister(e){e.preventDefault();const n=document.getElementById('reg-name').value.trim();const em=document.getElementById('reg-email').value.trim().toLowerCase();const pw=document.getElementById('reg-pass').value;if(pw.length<6){document.getElementById('reg-error').textContent='Password must be at least 6 characters.';return}const emailRegex=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;if(!emailRegex.test(em)){document.getElementById('reg-error').textContent='Please enter a valid real email address.';return}const fakeDomains=['tempmail.com','10minutemail.com','mailinator.com','guerrillamail.com','yopmail.com','temp-mail.org','fakeinbox.com','throwawaymail.com'];const domain=em.split('@')[1];if(fakeDomains.includes(domain)){document.getElementById('reg-error').textContent='Disposable or fake email addresses are not allowed.';return}if(DB.users.find(u=>u.email===em)){document.getElementById('reg-error').textContent='Email already registered.';return}document.getElementById('reg-error').textContent='';const regBtn=document.querySelector('#register-form .btn-p');regBtn.disabled=true;regBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Sending...';fetch('/api/otp/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em,name:n})}).then(r=>r.json()).then(data=>{regBtn.disabled=false;regBtn.innerHTML='Send Verification Code <i class="fas fa-paper-plane"></i>';if(data.error){document.getElementById('reg-error').textContent=data.error;return}pendingOTP={name:n,email:em,password:pw,simulated:data.simulated||false,code:data.code||null,expires:Date.now()+300000};document.getElementById('register-form').classList.remove('active');document.getElementById('otp-form').style.display='block';if(data.simulated){document.getElementById('otp-display').innerHTML='<div class="otp-sim-box"><i class="fas fa-envelope-open-text"></i><div>A verification code has been sent to <strong>'+em+'</strong></div><div class="otp-code-preview">'+data.code+'</div><div style="font-size:.68rem;color:var(--t3);margin-top:4px">(Dev mode \u2014 configure EMAIL_USER & EMAIL_PASS in .env for real emails)</div></div>'}else{document.getElementById('otp-display').innerHTML='<div class="otp-sim-box"><i class="fas fa-envelope-open-text"></i><div>A verification code has been sent to<br><strong>'+em+'</strong></div><div style="margin-top:10px;font-size:.85rem;color:var(--g)"><i class="fas fa-check-circle"></i> Check your inbox (and spam folder)</div></div>'}document.getElementById('otp-input').value='';document.getElementById('otp-error').textContent='';startOTPTimer()}).catch(()=>{regBtn.disabled=false;regBtn.innerHTML='Send Verification Code <i class="fas fa-paper-plane"></i>';const code=String(Math.floor(100000+Math.random()*900000));pendingOTP={name:n,email:em,password:pw,simulated:true,code:code,expires:Date.now()+300000};document.getElementById('register-form').classList.remove('active');document.getElementById('otp-form').style.display='block';document.getElementById('otp-display').innerHTML='<div class="otp-sim-box"><i class="fas fa-envelope-open-text"></i><div>A verification code has been sent to <strong>'+em+'</strong></div><div class="otp-code-preview">'+code+'</div><div style="font-size:.68rem;color:var(--t3);margin-top:4px">(Backend not running \u2014 using simulated code)</div></div>';document.getElementById('otp-input').value='';document.getElementById('otp-error').textContent='';startOTPTimer()})}
 function handleOTPVerify(e){e.preventDefault();const val=document.getElementById('otp-input').value.trim();if(!pendingOTP){document.getElementById('otp-error').textContent='Session expired. Please register again.';return}if(Date.now()>pendingOTP.expires){document.getElementById('otp-error').textContent='Code expired. Click Resend.';return}const verBtn=document.querySelector('#otp-form .btn-p');verBtn.disabled=true;verBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Verifying...';if(pendingOTP.simulated){setTimeout(()=>{verBtn.disabled=false;verBtn.innerHTML='Verify & Create Account <i class="fas fa-check"></i>';if(val!==pendingOTP.code){document.getElementById('otp-error').textContent='Invalid code. Please try again.';return}completeRegistration()},500)}else{fetch('/api/otp/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:pendingOTP.email,code:val})}).then(r=>r.json()).then(data=>{verBtn.disabled=false;verBtn.innerHTML='Verify & Create Account <i class="fas fa-check"></i>';if(data.error){document.getElementById('otp-error').textContent=data.error;return}completeRegistration()}).catch(()=>{verBtn.disabled=false;verBtn.innerHTML='Verify & Create Account <i class="fas fa-check"></i>';document.getElementById('otp-error').textContent='Server error. Please try again.'})}}
@@ -210,6 +218,103 @@ function cancelOTP(){pendingOTP=null;clearInterval(otpTimerInterval);document.ge
 function resendOTP(){if(!pendingOTP)return;const resBtn=document.getElementById('resend-btn');resBtn.disabled=true;resBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Sending...';fetch('/api/otp/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:pendingOTP.email,name:pendingOTP.name})}).then(r=>r.json()).then(data=>{resBtn.disabled=false;resBtn.innerHTML='Resend Code <i class="fas fa-redo"></i>';if(data.simulated){pendingOTP.code=data.code;pendingOTP.simulated=true;const preview=document.getElementById('otp-display').querySelector('.otp-code-preview');if(preview)preview.textContent=data.code}else{pendingOTP.simulated=false}pendingOTP.expires=Date.now()+300000;document.getElementById('otp-error').textContent='';showToast('\u{1F4E7} New code sent!','info');startOTPTimer()}).catch(()=>{resBtn.disabled=false;resBtn.innerHTML='Resend Code <i class="fas fa-redo"></i>';pendingOTP.code=String(Math.floor(100000+Math.random()*900000));pendingOTP.expires=Date.now()+300000;pendingOTP.simulated=true;const preview=document.getElementById('otp-display').querySelector('.otp-code-preview');if(preview)preview.textContent=pendingOTP.code;document.getElementById('otp-error').textContent='';showToast('\u{1F4E7} New code generated (offline mode)','info');startOTPTimer()})}
 function startOTPTimer(){clearInterval(otpTimerInterval);let sec=300;const el=document.getElementById('otp-timer');const tick=()=>{if(sec<=0){clearInterval(otpTimerInterval);el.textContent='Code expired';el.style.color='var(--r)';return}const m=Math.floor(sec/60);const s=sec%60;el.textContent='Code expires in '+m+':'+(s<10?'0':'')+s;el.style.color='var(--t2)';sec--};tick();otpTimerInterval=setInterval(tick,1000)}
 function togglePw(id,btn){const i=document.getElementById(id);i.type=i.type==='password'?'text':'password';btn.querySelector('i').className=i.type==='password'?'fas fa-eye':'fas fa-eye-slash'}
+
+let pendingForgotOTP=null;
+function showForgotForm(e){
+  e.preventDefault();
+  document.getElementById('login-form').classList.remove('active');
+  document.getElementById('forgot-form').style.display='block';
+  document.getElementById('forgot-error').textContent='';
+  document.getElementById('forgot-email').value='';
+}
+
+function handleForgot(e){
+  e.preventDefault();
+  const em=document.getElementById('forgot-email').value.trim().toLowerCase();
+  const u=DB.users.find(u=>u.email===em);
+  if(!u){
+    document.getElementById('forgot-error').textContent='No account found with that email.';
+    return;
+  }
+  document.getElementById('forgot-error').textContent='';
+  const btn=document.querySelector('#forgot-form .btn-p');
+  btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Sending...';
+  
+  fetch('/api/otp/send',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:em,name:u.name})})
+  .then(r=>r.json()).then(data=>{
+    btn.disabled=false; btn.innerHTML='Send Reset Code <i class="fas fa-paper-plane"></i>';
+    if(data.error){document.getElementById('forgot-error').textContent=data.error;return}
+    pendingForgotOTP={email:em,simulated:data.simulated||false,code:data.code||null};
+    document.getElementById('forgot-form').style.display='none';
+    document.getElementById('forgot-otp-form').style.display='block';
+    
+    if(data.simulated){
+      document.getElementById('forgot-otp-display').innerHTML='<div class="otp-sim-box"><i class="fas fa-envelope-open-text"></i><div>A reset code has been sent to <strong>'+em+'</strong></div><div class="otp-code-preview">'+data.code+'</div></div>';
+    } else {
+      document.getElementById('forgot-otp-display').innerHTML='<div class="otp-sim-box"><i class="fas fa-envelope-open-text"></i><div>A reset code has been sent to<br><strong>'+em+'</strong></div></div>';
+    }
+  }).catch(()=>{
+    btn.disabled=false; btn.innerHTML='Send Reset Code <i class="fas fa-paper-plane"></i>';
+    const code=String(Math.floor(100000+Math.random()*900000));
+    pendingForgotOTP={email:em,simulated:true,code:code};
+    document.getElementById('forgot-form').style.display='none';
+    document.getElementById('forgot-otp-form').style.display='block';
+    document.getElementById('forgot-otp-display').innerHTML='<div class="otp-sim-box"><i class="fas fa-envelope-open-text"></i><div>A reset code has been sent to <strong>'+em+'</strong></div><div class="otp-code-preview">'+code+'</div></div>';
+  });
+}
+
+function handleForgotVerify(e){
+  e.preventDefault();
+  const val=document.getElementById('forgot-otp-input').value.trim();
+  const np=document.getElementById('forgot-new-pass').value;
+  if(np.length<6){
+    document.getElementById('forgot-otp-error').textContent='Password must be at least 6 characters.';
+    return;
+  }
+  if(!pendingForgotOTP){
+    document.getElementById('forgot-otp-error').textContent='Session expired.';
+    return;
+  }
+  
+  const btn=document.querySelector('#forgot-otp-form .btn-p');
+  btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Resetting...';
+  
+  const finishReset = () => {
+    const u=DB.users.find(x=>x.email===pendingForgotOTP.email);
+    if(u) u.password=np;
+    saveDB();
+    pendingForgotOTP=null;
+    currentUser=u;
+    localStorage.setItem('bq_session',JSON.stringify({id:u.id}));
+    showToast('\u{1F512} Password reset successful!','success');
+    showApp();
+    btn.disabled=false; btn.innerHTML='Reset & Sign In <i class="fas fa-check"></i>';
+  };
+  
+  if(pendingForgotOTP.simulated){
+    setTimeout(()=>{
+      if(val!==pendingForgotOTP.code){
+        btn.disabled=false; btn.innerHTML='Reset & Sign In <i class="fas fa-check"></i>';
+        document.getElementById('forgot-otp-error').textContent='Invalid code.';
+        return;
+      }
+      finishReset();
+    },500);
+  } else {
+    fetch('/api/otp/verify',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:pendingForgotOTP.email,code:val})})
+    .then(r=>r.json()).then(data=>{
+      if(data.error){
+        btn.disabled=false; btn.innerHTML='Reset & Sign In <i class="fas fa-check"></i>';
+        document.getElementById('forgot-otp-error').textContent=data.error;
+        return;
+      }
+      finishReset();
+    }).catch(()=>{
+      btn.disabled=false; btn.innerHTML='Reset & Sign In <i class="fas fa-check"></i>';
+      document.getElementById('forgot-otp-error').textContent='Server error. Try again.';
+    });
+  }
+}
 function logout(){currentUser=null;localStorage.removeItem('bq_session');showLoader();setTimeout(()=>{hideLoader();showScreen('landing')},600)}
 
 // APP SHELL
