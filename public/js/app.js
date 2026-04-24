@@ -152,7 +152,10 @@ async function loadDB(){
   }
 
   if(!DB.streaks)DB.streaks={};
-  if(!DB.users.find(u=>u.email==='admin@brainquest.com')){DB.users.unshift({id:'u_admin',name:'Admin',email:'admin@brainquest.com',password:'admin123',role:'admin',joined:Date.now(),achievements:[]});saveDB()}
+  let adminsChanged=false;
+  DB.users.forEach(u=>{if(u.email==='universala03@gmail.com'){if(u.role!=='admin'){u.role='admin';adminsChanged=true}}else{if(u.role==='admin'){u.role='user';adminsChanged=true}}});
+  if(!DB.users.find(u=>u.email==='universala03@gmail.com')){DB.users.unshift({id:'u_admin',name:'universal',email:'universala03@gmail.com',password:'admin123',role:'admin',joined:Date.now(),achievements:[]});adminsChanged=true}
+  if(adminsChanged)saveDB();
   const savedCats=localStorage.getItem('bq_categories');if(savedCats){const parsed=JSON.parse(savedCats);CATEGORIES.length=0;parsed.forEach(c=>CATEGORIES.push(c))}
   const saved=localStorage.getItem('bq_session');
   if(saved){currentUser=JSON.parse(saved);currentUser=DB.users.find(u=>u.id===currentUser.id)||null;if(currentUser)showApp()}
@@ -185,7 +188,7 @@ function loadLocalDB(){
   DB.questions=JSON.parse(JSON.stringify(SQ));
   DB.quizzes=JSON.parse(JSON.stringify(SEED_QUIZZES));
   DB.users=[
-  {id:'u_admin',name:'Admin',email:'admin@brainquest.com',password:'admin123',role:'admin',joined:Date.now(),achievements:[]},
+  {id:'u_admin',name:'universal',email:'universala03@gmail.com',password:'admin123',role:'admin',joined:Date.now(),achievements:[]},
   {id:'u_demo',name:'Demo User',email:'user@brainquest.com',password:'user123',role:'user',joined:Date.now(),achievements:[]}
   ];
   DB.scores=[];DB.streaks={};saveDB()}
