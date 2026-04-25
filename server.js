@@ -23,16 +23,60 @@ app.use('/api/leaderboard', require('./routes/leaderboardRoutes'));
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/otp', require('./routes/otpRoutes'));
 
-// Global Memory Sync for Demo Purposes
+// MongoDB Integration for Permanent Storage
+const mongoose = require('mongoose');
+const MONGODB_URI = process.env.MONGODB_URI;
+let dbConnected = false;
+
+if (MONGODB_URI) {
+  mongoose.connect(MONGODB_URI)
+    .then(() => {
+      console.log('Connected to MongoDB Atlas successfully.');
+      dbConnected = true;
+    })
+    .catch(err => console.error('MongoDB connection error:', err));
+}
+
+const dbSchema = new mongoose.Schema({
+  id: { type: String, default: 'global' },
+  data: { type: mongoose.Schema.Types.Mixed, default: {} }
+});
+const GlobalDB = mongoose.model('GlobalDB', dbSchema);
+
+// Global Memory Sync (Fallback for Local Dev without Mongo)
 let globalMemoryDB = null;
 
-app.get('/api/sync', (req, res) => {
-  res.json(globalMemoryDB || {});
+app.get('/api/sync', async (req, res) => {
+  if (dbConnected) {
+    try {
+      let doc = await GlobalDB.findOne({ id: 'global' });
+      res.json(doc && doc.data ? doc.data : {});
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'DB Read Error' });
+    }
+  } else {
+    res.json(globalMemoryDB || {});
+  }
 });
 
-app.post('/api/sync', (req, res) => {
-  globalMemoryDB = req.body;
-  res.json({ success: true });
+app.post('/api/sync', async (req, res) => {
+  if (dbConnected) {
+    try {
+      await GlobalDB.findOneAndUpdate(
+        { id: 'global' },
+        { data: req.body },
+        { upsert: true, new: true }
+      );
+      res.json({ success: true });
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'DB Write Error' });
+    }
+  } else {
+    globalMemoryDB = req.body;
+    res.json({ success: true });
+  }
 });
 
 
