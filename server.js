@@ -15,12 +15,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // API Routes
-app.use('/api/auth', require('./routes/authRoutes'));
-app.use('/api/categories', require('./routes/categoryRoutes'));
-app.use('/api/questions', require('./routes/questionRoutes'));
-app.use('/api/quizzes', require('./routes/quizRoutes'));
-app.use('/api/leaderboard', require('./routes/leaderboardRoutes'));
-app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/otp', require('./routes/otpRoutes'));
 
 // MongoDB Integration for Permanent Storage

@@ -166,9 +166,9 @@ async function pollSync(){
     const res = await fetch('/api/sync');
     const data = await res.json();
     if(data && data.users && data.users.length > 0) {
-      const oldScores = JSON.stringify(DB.scores||[]);
-      const newScores = JSON.stringify(data.scores||[]);
-      if(oldScores !== newScores) {
+      const oldDBString = JSON.stringify(DB);
+      const newDBString = JSON.stringify(data);
+      if(oldDBString !== newDBString) {
         DB = data;
         localStorage.setItem('bq_db', JSON.stringify(DB));
         if(typeof initLanding === 'function') initLanding();
@@ -176,6 +176,7 @@ async function pollSync(){
         if(lp && lp.classList.contains('active') && typeof renderLbTable === 'function') {
           renderLbTable();
         }
+        if(currentUser && currentUser.role==='admin' && typeof renderAdmin === 'function') renderAdmin();
       }
     }
   } catch(e) {}
